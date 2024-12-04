@@ -1,7 +1,7 @@
-import ModbusRTU from "modbus-serial";
-import { IClientPublishOptions, MqttClient } from "mqtt";
-import { createLogger } from "./logger";
-import { getDeviceInformation, getValues, ZoneValues } from "./modbus";
+import ModbusRTU from 'modbus-serial'
+import { IClientPublishOptions, MqttClient } from 'mqtt'
+import { createLogger } from './logger'
+import { DeviceInformation, getValues, ZoneValues } from './modbus'
 
 type TopicValueMap = Record<string, string>
 
@@ -13,10 +13,8 @@ export const TOPIC_NAME_STATUS = `${TOPIC_PREFIX}/status`
 
 const logger = createLogger('mqtt')
 
-export const publishDeviceInformation = async (modbusClient: ModbusRTU, mqttClient: MqttClient) => {
+export const publishDeviceInformation = async (deviceInformation: DeviceInformation, mqttClient: MqttClient) => {
   let topicValueMap: TopicValueMap = {}
-
-  const deviceInformation = await getDeviceInformation(modbusClient)
 
   for (const [item, value] of Object.entries(deviceInformation)) {
     const topicName = `${TOPIC_PREFIX_DEVICE_INFORMATION}/${item}`

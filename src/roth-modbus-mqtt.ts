@@ -114,7 +114,8 @@ const argv = yargs(process.argv.slice(2))
   logger.info(`Successfully connected to MQTT broker at ${argv.mqttBrokerUrl}`)
 
   // Publish device information once only (since it doesn't change)
-  await publishDeviceInformation(modbusClient, mqttClient)
+  const deviceInformation = await getDeviceInformation(modbusClient)
+  await publishDeviceInformation(deviceInformation, mqttClient)
 
   // Publish readings/settings/modes/alarms once immediately, then regularly according to the configured
   // interval.
@@ -125,7 +126,7 @@ const argv = yargs(process.argv.slice(2))
 
   logger.info(`MQTT scheduler started, will publish readings every ${argv.mqttPublishInterval} seconds`)
 
-  await configureMqttDiscovery(modbusClient, mqttClient)
+  await configureMqttDiscovery(deviceInformation, mqttClient)
   logger.info('Finished configuration Home Assistant MQTT discovery')
 
   // Subscribe to changes and register a handler

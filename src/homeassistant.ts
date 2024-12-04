@@ -1,27 +1,20 @@
-import { DeviceInformation, getDeviceInformation } from './modbus'
-import {
-  TOPIC_NAME_STATUS, TOPIC_PREFIX, TOPIC_PREFIX_DEVICE_INFORMATION, TOPIC_PREFIX_STATUS, TOPIC_PREFIX_ZONE,
-
-} from './mqtt'
+import { DeviceInformation } from './modbus'
+import { TOPIC_NAME_STATUS, TOPIC_PREFIX_DEVICE_INFORMATION, TOPIC_PREFIX_STATUS, TOPIC_PREFIX_ZONE } from './mqtt'
 import { createLogger } from './logger'
-import ModbusRTU from "modbus-serial"
-import { MqttClient } from "mqtt"
+import { MqttClient } from 'mqtt'
 
 const logger = createLogger('homeassistant')
 
-export const configureMqttDiscovery = async (modbusClient: ModbusRTU, mqttClient: MqttClient) => {
-  // Build information about the ventilation unit. The "deviceIdentifier" is used as <node_id> in discovery topic
-  // names, so it must match [a-zA-Z0-9_-].
-  const modbusDeviceInformation = await getDeviceInformation(modbusClient)
-  const deviceIdentifier = createDeviceIdentifierString(modbusDeviceInformation)
+export const configureMqttDiscovery = async (deviceInformation: DeviceInformation, mqttClient: MqttClient) => {
+  const deviceIdentifier = createDeviceIdentifierString(deviceInformation)
 
   // The "device" object that is part of each sensor's configuration payload
   const mqttDeviceInformation = {
     'identifiers': deviceIdentifier,
     'name': `Roth Touchline SL`,
-    'hw_version': modbusDeviceInformation.pcbVersion,
-    'sw_version': modbusDeviceInformation.firmwareVersion,
-    'serial_number': modbusDeviceInformation.serialNumber,
+    'hw_version': deviceInformation.pcbVersion,
+    'sw_version': deviceInformation.firmwareVersion,
+    'serial_number': deviceInformation.serialNumber,
     'model': 'Touchline SL',
     'manufacturer': 'Roth',
   }
