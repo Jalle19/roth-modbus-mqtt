@@ -34,38 +34,73 @@ export const configureMqttDiscovery = async (modbusClient: ModbusRTU, mqttClient
 
   // Binary sensors
   let binarySensorConfigurationMap = {
-    'heatingCoolingStatus': createBinarySensorConfiguration(configurationBase, 'heatingCoolingStatus', 'Heating/cooling'),
-    'ecoInput': createBinarySensorConfiguration(configurationBase, 'ecoInputStatus', 'Eco input'),
-    'pump': createBinarySensorConfiguration(configurationBase, 'pumpStatus', 'Pump'),
-    'potentialFreeContact': createBinarySensorConfiguration(configurationBase, 'potentialFreeContactStatus', 'Potential-free contact'),
+    'heatingCoolingStatus': createBinarySensorConfiguration(
+      configurationBase,
+      'heatingCoolingStatus',
+      'Heating/cooling',
+      { 'icon': 'mdi:hvac' },
+    ),
+    'ecoInput': createBinarySensorConfiguration(configurationBase, 'ecoInputStatus', 'Eco input', {
+      'icon': 'mdi:sprout',
+    }),
+    'pump': createBinarySensorConfiguration(configurationBase, 'pumpStatus', 'Pump', { 'icon': 'mdi:pump' }),
+    'potentialFreeContact': createBinarySensorConfiguration(
+      configurationBase,
+      'potentialFreeContactStatus',
+      'Potential-free contact',
+      { 'icon': 'mdi:electric-switch' },
+    ),
   }
 
   // Selects
   let selectConfigurationMap = {
-    'mode': createSelectConfiguration(configurationBase, 'mode', 'Quick action mode', ['Normal', 'Vacation', 'Eco', 'Comfort']),
-    'heatCoolMode': createSelectConfiguration(configurationBase, 'heatCoolMode', 'Heating/cooling mode', ['Heating', 'Cooling', 'Auto']),
+    'mode': createSelectConfiguration(configurationBase, 'mode', 'Quick action mode', [
+      'Normal',
+      'Vacation',
+      'Eco',
+      'Comfort',
+    ]),
+    'heatCoolMode': createSelectConfiguration(configurationBase, 'heatCoolMode', 'Heating/cooling mode', [
+      'Heating',
+      'Cooling',
+      'Auto',
+    ]),
   }
 
   let sensorConfigurationMap = {
     'numZones': createDiagnosticSensorConfiguration(configurationBase, 'numZones', 'Number of zones'),
     'numActuators': createDiagnosticSensorConfiguration(configurationBase, 'numActuators', 'Number of actuators'),
-    'numWindowSensors': createDiagnosticSensorConfiguration(configurationBase, 'numWindowSensors', 'Number of window sensors'),
+    'numWindowSensors': createDiagnosticSensorConfiguration(
+      configurationBase,
+      'numWindowSensors',
+      'Number of window sensors',
+    ),
   }
 
   let hvacConfigurationMap = {}
 
   // Various repeated sensors for each zone
-  for (let i = 0; i < modbusDeviceInformation.numZones; i++) {
+  for (let i = 0; i < deviceInformation.numZones; i++) {
     const zone = i + 1
 
     binarySensorConfigurationMap = {
       ...binarySensorConfigurationMap,
-      [`zone${zone}Heating`]: createZoneBinarySensorConfiguration(configurationBase, zone, 'isHeating', `Zone ${zone} heating`),
+      [`zone${zone}Heating`]: createZoneBinarySensorConfiguration(
+        configurationBase,
+        zone,
+        'isHeating',
+        `Zone ${zone} heating`,
+      ),
     }
 
     sensorConfigurationMap = {
       ...sensorConfigurationMap,
-      [`zone${zone}BatteryLevel`]: createZoneBatterySensorConfiguration(configurationBase, zone, 'batteryLevel', `Zone ${zone} battery level`),
+      [`zone${zone}BatteryLevel`]: createZoneBatterySensorConfiguration(
+        configurationBase,
+        zone,
+        'batteryLevel',
+        `Zone ${zone} battery level`,
+      ),
     }
 
     hvacConfigurationMap = {
@@ -100,7 +135,12 @@ export const createDeviceIdentifierString = (modbusDeviceInformation: DeviceInfo
   return `roth-${modbusDeviceInformation.serialNumber}`
 }
 
-const createBinarySensorConfiguration = (configurationBase: object, statusName: string, entityName: string) => {
+const createBinarySensorConfiguration = (
+  configurationBase: object,
+  statusName: string,
+  entityName: string,
+  extraProperties = {},
+) => {
   return {
     ...configurationBase,
     'unique_id': `roth-${statusName}`,
@@ -109,6 +149,7 @@ const createBinarySensorConfiguration = (configurationBase: object, statusName: 
     'state_topic': `${TOPIC_PREFIX_STATUS}/${statusName}`,
     'payload_on': 'true',
     'payload_off': 'false',
+    ...extraProperties,
   }
 }
 
@@ -145,6 +186,7 @@ const createZoneBinarySensorConfiguration = (configurationBase: object, zone: nu
     'state_topic': `${TOPIC_PREFIX_ZONE}/${zone}/${statusName}`,
     'payload_on': 'true',
     'payload_off': 'false',
+    'icon': 'mdi:heat-wave',
   }
 }
 
