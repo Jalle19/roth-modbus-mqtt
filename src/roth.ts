@@ -1,3 +1,6 @@
+export const QUICK_ACTION_MODES = ['Normal', 'Vacation', 'Eco', 'Comfort']
+export const HEATING_COOLING_MODES = ['Heating', 'Cooling', 'Auto']
+
 export const parseFirmwareDate = (date: number): string => {
   return String(date)
 }

@@ -9,7 +9,13 @@ import {
   validateDevice,
 } from './modbus'
 import ModbusRTU from 'modbus-serial'
-import { publishDeviceInformation, publishValues, validateBrokerUrl } from './mqtt'
+import {
+  handlePublishedMessage,
+  publishDeviceInformation,
+  publishValues,
+  subscribeTopics,
+  validateBrokerUrl,
+} from './mqtt'
 import { connectAsync } from 'mqtt'
 import { configureMqttDiscovery } from './homeassistant'
 
@@ -137,16 +143,10 @@ const argv = yargs(process.argv.slice(2))
   logger.info('Finished configuration Home Assistant MQTT discovery')
 
   // Subscribe to changes and register a handler
-  // await subscribeToChanges(modbusClient, mqttClient)
-  // mqttClient.on('message', async (topicName, payload) => {
-  //   await handleMessage(modbusClient, mqttClient, topicName, payload)
-  // })
-  //
-  // // Optionally configure Home Assistant MQTT discovery
-  // if (argv.mqttDiscovery) {
-  //   await configureMqttDiscovery(modbusClient, mqttClient)
-  //   logger.info('Finished configuration Home Assistant MQTT discovery')
-  // }
+  await subscribeTopics(mqttClient)
+  mqttClient.on('message', async (topicName, payload) => {
+    await handlePublishedMessage(modbusClient, mqttClient, topicName, payload)
+  })
 
   // Log reconnection attempts
   mqttClient.on('reconnect', () => {

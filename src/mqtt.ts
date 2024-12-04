@@ -1,7 +1,7 @@
 import ModbusRTU from 'modbus-serial'
 import { IClientPublishOptions, MqttClient } from 'mqtt'
 import { createLogger } from './logger'
-import { DeviceInformation, getValues, ZoneValues } from './modbus'
+import { DeviceInformation, getValues, setHeatCoolMode, setMode, setZoneTemperature, ZoneValues } from './modbus'
 
 type TopicValueMap = Record<string, string>
 
@@ -55,6 +55,54 @@ export const publishValues = async (modbusClient: ModbusRTU, mqttClient: MqttCli
   logger.debug('Publishing status and zones...')
 
   await publishTopics(mqttClient, topicMap)
+}
+
+export const subscribeTopics = async (mqttClient: MqttClient) => {
+  // Subscribe to writable topics
+  const topicNames = [`${TOPIC_PREFIX_STATUS}/+/set`, `${TOPIC_PREFIX_ZONE}/+/+/set`]
+
+  for (const topicName of topicNames) {
+    logger.info(`Subscribing to topic(s) ${topicName}`)
+
+    await mqttClient.subscribeAsync(topicName)
+  }
+}
+
+export const handlePublishedMessage = async (
+  modbusClient: ModbusRTU,
+  mqttClient: MqttClient,
+  topicName: string,
+  payload: unknown,
+) => {
+  logger.info(`Received ${payload} on topic ${topicName}`)
+
+  if (topicName.startsWith(TOPIC_PREFIX_ZONE)) {
+    const partialTopic = topicName.substring(TOPIC_PREFIX_ZONE.length + 1)
+    const [zone, setting, ,] = partialTopic.split('/')
+
+    if (setting === 'setTemperature') {
+      logger.info(`Changing zone ${zone} temperature to ${payload}`)
+      await setZoneTemperature(modbusClient, parseInt(zone, 10), payload as number)
+    } else {
+      logger.error(`Unknown setting ${setting} received`)
+    }
+  } else if (topicName.startsWith(TOPIC_PREFIX_STATUS)) {
+    const partialTopic = topicName.substring(TOPIC_PREFIX_STATUS.length + 1)
+    const [setting] = partialTopic.split('/')
+
+    logger.info(`Setting setting ${setting} to ${payload}`)
+
+    switch (setting) {
+      case 'mode':
+        await setMode(modbusClient, payload as number)
+        break
+      case 'heatCoolMode':
+        await setHeatCoolMode(modbusClient, payload as number)
+        break
+      default:
+        logger.error(`Unknown setting ${setting}`)
+    }
+  }
 }
 
 const publishTopics = async (

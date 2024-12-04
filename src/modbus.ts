@@ -154,6 +154,18 @@ export const getValues = async (modbusClient: ModbusRTU): Promise<Values> => {
   }
 }
 
+export const setZoneTemperature = async (modbusClient: ModbusRTU, zone: number, temperature: number): Promise<void> => {
+  await tryWriteHoldingRegister(modbusClient, 221 + zone - 1, encodeTemperature(temperature))
+}
+
+export const setMode = async (modbusClient: ModbusRTU, mode: number): Promise<void> => {
+  await tryWriteHoldingRegister(modbusClient, 18, mode)
+}
+
+export const setHeatCoolMode = async (modbusClient: ModbusRTU, mode: number): Promise<void> => {
+  await tryWriteHoldingRegister(modbusClient, 19, mode)
+}
+
 const probeConfiguredZones = async (modbusClient: ModbusRTU): Promise<number> => {
   let zone
 
@@ -202,6 +214,10 @@ const parseTemperature = (value: number): number => {
 
 const parseHumidity = parseTemperature
 
+const encodeTemperature = (value: number): number => {
+  return Math.floor(value * 10)
+}
+
 export const validateDevice = (device: string): boolean => {
   return device.startsWith('/') || device.startsWith('tcp://')
 }
@@ -244,6 +260,16 @@ const tryReadHoldingRegisters = async (
     return await modbusClient.readHoldingRegisters(dataAddress, length)
   } catch (e) {
     logger.error(`Failed to read holding register address ${dataAddress}, length ${length}`)
+    throw e
+  }
+}
+
+const tryWriteHoldingRegister = async (modbusClient: ModbusRTU, dataAddress: number, value: number) => {
+  try {
+    logger.debug(`Writing ${value} to holding register address ${dataAddress}`)
+    return await modbusClient.writeRegister(dataAddress, value)
+  } catch (e) {
+    logger.error(`Failed to write holding register address ${dataAddress}, value ${value}`)
     throw e
   }
 }

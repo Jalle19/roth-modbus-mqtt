@@ -2,6 +2,7 @@ import { DeviceInformation } from './modbus'
 import { TOPIC_NAME_STATUS, TOPIC_PREFIX_DEVICE_INFORMATION, TOPIC_PREFIX_STATUS, TOPIC_PREFIX_ZONE } from './mqtt'
 import { createLogger } from './logger'
 import { MqttClient } from 'mqtt'
+import { HEATING_COOLING_MODES, QUICK_ACTION_MODES } from './roth'
 
 const logger = createLogger('homeassistant')
 
@@ -47,17 +48,13 @@ export const configureMqttDiscovery = async (deviceInformation: DeviceInformatio
 
   // Selects
   let selectConfigurationMap = {
-    'mode': createSelectConfiguration(configurationBase, 'mode', 'Quick action mode', [
-      'Normal',
-      'Vacation',
-      'Eco',
-      'Comfort',
-    ]),
-    'heatCoolMode': createSelectConfiguration(configurationBase, 'heatCoolMode', 'Heating/cooling mode', [
-      'Heating',
-      'Cooling',
-      'Auto',
-    ]),
+    'mode': createSelectConfiguration(configurationBase, 'mode', 'Quick action mode', QUICK_ACTION_MODES),
+    'heatCoolMode': createSelectConfiguration(
+      configurationBase,
+      'heatCoolMode',
+      'Heating/cooling mode',
+      HEATING_COOLING_MODES,
+    ),
   }
 
   let sensorConfigurationMap = {
@@ -160,6 +157,7 @@ const createSelectConfiguration = (
     'options': options,
     'state_topic': `${TOPIC_PREFIX_STATUS}/${selectName}`,
     'command_topic': `${TOPIC_PREFIX_STATUS}/${selectName}/set`,
+    'command_template': '{{ this.attributes.options.index(value) }}',
     'value_template': '{{ this.attributes.options[(value | int)] }}',
   }
 }
@@ -220,6 +218,7 @@ const createZoneHvacConfiguration = (configurationBase: object, zone: number, en
     'current_humidity_topic': `${TOPIC_PREFIX_ZONE}/${zone}/humidity`,
     'current_temperature_topic': `${TOPIC_PREFIX_ZONE}/${zone}/currentTemperature`,
     'temperature_state_topic': `${TOPIC_PREFIX_ZONE}/${zone}/setTemperature`,
+    'temperature_command_topic': `${TOPIC_PREFIX_ZONE}/${zone}/setTemperature/set`,
     'mode_state_topic': `${TOPIC_PREFIX_ZONE}/${zone}/isHeating`,
     'mode_state_template': '{{ "auto" if value == "true" else "off" }}',
     'modes': ['off', 'auto'],
