@@ -1,0 +1,17 @@
+[Unit]
+Description=Modbus to MQTT proxy Roth Touchline SL controllers
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/roth-modbus-mqtt
+ExecStartPre=/usr/bin/npm install
+ExecStartPre=/usr/bin/npm run build
+# Do not uncomment this, instead, run systemctl edit roth-modbus-mqtt and add a suitable ExecStart parameter
+#ExecStart=/usr/bin/node /opt/roth-modbus-mqtt/dist/roth-modbus-mqtt.js
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
