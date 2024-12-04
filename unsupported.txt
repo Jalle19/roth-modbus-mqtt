@@ -1,0 +1,4 @@
+- floor temperature sensors
+- actuators
+- window sensors
+- extension units (zones 9-48)

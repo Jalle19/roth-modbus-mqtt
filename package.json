@@ -1,0 +1,17 @@
+{
+  "name": "roth-modbus-mqtt",
+  "scripts": {
+    "build": "rm -rf dist/ && tsc"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.1",
+    "@types/yargs": "^17.0.33",
+    "typescript": "^5.7.2"
+  },
+  "dependencies": {
+    "modbus-serial": "^8.0.17",
+    "mqtt": "^5.10.3",
+    "winston": "^3.17.0",
+    "yargs": "^17.7.2"
+  }
+}
