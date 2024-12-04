@@ -17,11 +17,7 @@ export const setLogLevel = (logger: Logger, level: string) => {
 export const createLogger = (module: string): Logger => {
   return winston.createLogger({
     'level': DEFAULT_LOG_LEVEL,
-    'format': winston.format.combine(
-        winston.format.label({ label: module }),
-        winston.format.timestamp(),
-        logFormat
-    ),
+    'format': winston.format.combine(winston.format.label({ label: module }), winston.format.timestamp(), logFormat),
     'transports': transports,
   })
 }

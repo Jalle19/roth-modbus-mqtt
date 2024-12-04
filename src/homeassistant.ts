@@ -146,7 +146,12 @@ const createBinarySensorConfiguration = (
   }
 }
 
-const createSelectConfiguration = (configurationBase: object, selectName: string, entityName: string, options: string[]) => {
+const createSelectConfiguration = (
+  configurationBase: object,
+  selectName: string,
+  entityName: string,
+  options: string[],
+) => {
   return {
     ...configurationBase,
     'unique_id': `roth-${selectName}`,
@@ -155,7 +160,7 @@ const createSelectConfiguration = (configurationBase: object, selectName: string
     'options': options,
     'state_topic': `${TOPIC_PREFIX_STATUS}/${selectName}`,
     'command_topic': `${TOPIC_PREFIX_STATUS}/${selectName}/set`,
-    'value_template': '{{ this.attributes.options[(value | int)] }}'
+    'value_template': '{{ this.attributes.options[(value | int)] }}',
   }
 }
 
@@ -170,7 +175,12 @@ const createDiagnosticSensorConfiguration = (configurationBase: object, diagnost
   }
 }
 
-const createZoneBinarySensorConfiguration = (configurationBase: object, zone: number, statusName: string, entityName: string) => {
+const createZoneBinarySensorConfiguration = (
+  configurationBase: object,
+  zone: number,
+  statusName: string,
+  entityName: string,
+) => {
   return {
     ...configurationBase,
     'unique_id': `roth-zone${zone}-${statusName}`,
@@ -183,7 +193,12 @@ const createZoneBinarySensorConfiguration = (configurationBase: object, zone: nu
   }
 }
 
-const createZoneBatterySensorConfiguration = (configurationBase: object, zone: number, statusName: string, entityName: string) => {
+const createZoneBatterySensorConfiguration = (
+  configurationBase: object,
+  zone: number,
+  statusName: string,
+  entityName: string,
+) => {
   return {
     ...configurationBase,
     'unique_id': `roth-zone${zone}-${statusName}`,

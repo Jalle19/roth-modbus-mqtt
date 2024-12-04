@@ -1,63 +1,70 @@
 import yargs from 'yargs'
-import { createLogger, setLogLevel } from "./logger";
-import { ModbusDeviceType, ModbusRtuDevice, ModbusTcpDevice, parseDevice, validateDevice } from "./modbus";
-import ModbusRTU from "modbus-serial";
-import { publishDeviceInformation, publishValues, validateBrokerUrl } from "./mqtt";
-import { connectAsync } from "mqtt";
-import { configureMqttDiscovery } from "./homeassistant";
+import { createLogger, setLogLevel } from './logger'
+import {
+  getDeviceInformation,
+  ModbusDeviceType,
+  ModbusRtuDevice,
+  ModbusTcpDevice,
+  parseDevice,
+  validateDevice,
+} from './modbus'
+import ModbusRTU from 'modbus-serial'
+import { publishDeviceInformation, publishValues, validateBrokerUrl } from './mqtt'
+import { connectAsync } from 'mqtt'
+import { configureMqttDiscovery } from './homeassistant'
 
 const argv = yargs(process.argv.slice(2))
-    .usage('node $0 [options]')
-    .options({
-      'device': {
-        type: 'string',
-        description:
-            'The Modbus device to use, e.g. /dev/ttyUSB0 for Modbus RTU or tcp://192.168.1.40:502 for Modbus TCP',
-        demandOption: true,
-        alias: 'd',
-      },
-      'modbusSlave': {
-        type: 'number',
-        description: 'The Modbus slave address',
-        default: 1,
-        alias: 's',
-      },
-      'mqttBrokerUrl': {
-        type: 'string',
-        description: 'The URL to the MQTT broker, e.g. mqtt://localhost:1883.',
-        demandOption: true,
-        alias: 'm',
-      },
-      'mqttUsername': {
-        type: 'string',
-        description: 'The username to use when connecting to the MQTT broker. Omit to disable authentication.',
-        default: undefined,
-      },
-      'mqttPassword': {
-        type: 'string',
-        description:
-            'The password to use when connecting to the MQTT broker. Required when mqttUsername is defined. Omit to disable authentication.',
-        default: undefined,
-      },
-      'mqttPublishInterval': {
-        type: 'number',
-        description: 'How often messages should be published over MQTT (in seconds)',
-        default: 10,
-        alias: 'i',
-      },
-      'mqttDiscovery': {
-        description:
-            'Whether to enable Home Assistant MQTT discovery support.',
-        type: 'boolean',
-        default: true,
-      },
-      'debug': {
-        description: 'Enable debug logging',
-        type: 'boolean',
-        default: false,
-        alias: 'v',
-      },
-    }).parseSync()
+  .usage('node $0 [options]')
+  .options({
+    'device': {
+      type: 'string',
+      description:
+        'The Modbus device to use, e.g. /dev/ttyUSB0 for Modbus RTU or tcp://192.168.1.40:502 for Modbus TCP',
+      demandOption: true,
+      alias: 'd',
+    },
+    'modbusSlave': {
+      type: 'number',
+      description: 'The Modbus slave address',
+      default: 1,
+      alias: 's',
+    },
+    'mqttBrokerUrl': {
+      type: 'string',
+      description: 'The URL to the MQTT broker, e.g. mqtt://localhost:1883.',
+      demandOption: true,
+      alias: 'm',
+    },
+    'mqttUsername': {
+      type: 'string',
+      description: 'The username to use when connecting to the MQTT broker. Omit to disable authentication.',
+      default: undefined,
+    },
+    'mqttPassword': {
+      type: 'string',
+      description:
+        'The password to use when connecting to the MQTT broker. Required when mqttUsername is defined. Omit to disable authentication.',
+      default: undefined,
+    },
+    'mqttPublishInterval': {
+      type: 'number',
+      description: 'How often messages should be published over MQTT (in seconds)',
+      default: 10,
+      alias: 'i',
+    },
+    'mqttDiscovery': {
+      description: 'Whether to enable Home Assistant MQTT discovery support.',
+      type: 'boolean',
+      default: true,
+    },
+    'debug': {
+      description: 'Enable debug logging',
+      type: 'boolean',
+      default: false,
+      alias: 'v',
+    },
+  })
+  .parseSync()
 
 ;(async () => {
   const logger = createLogger('main')

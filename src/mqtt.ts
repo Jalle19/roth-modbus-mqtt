@@ -57,7 +57,11 @@ export const publishValues = async (modbusClient: ModbusRTU, mqttClient: MqttCli
   await publishTopics(mqttClient, topicMap)
 }
 
-const publishTopics = async (mqttClient: MqttClient, topicMap: TopicValueMap, publishOptions: IClientPublishOptions = {}) => {
+const publishTopics = async (
+  mqttClient: MqttClient,
+  topicMap: TopicValueMap,
+  publishOptions: IClientPublishOptions = {},
+) => {
   const publishPromises = []
 
   for (const [topic, value] of Object.entries(topicMap)) {

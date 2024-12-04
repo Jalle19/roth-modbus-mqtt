@@ -1,11 +1,11 @@
-import ModbusRTU from "modbus-serial";
-import { createLogger } from "./logger";
-import { ReadCoilResult, ReadRegisterResult } from "modbus-serial/ModbusRTU";
-import { parseFirmwareDate, parseFirmwareTime, parseFirmwareVersion, parseSerialNumber } from "./roth";
+import ModbusRTU from 'modbus-serial'
+import { createLogger } from './logger'
+import { ReadCoilResult, ReadRegisterResult } from 'modbus-serial/ModbusRTU'
+import { parseFirmwareDate, parseFirmwareTime, parseFirmwareVersion, parseSerialNumber } from './roth'
 
 export enum ModbusDeviceType {
   RTU,
-  TCP
+  TCP,
 }
 
 export type ModbusRtuDevice = {
@@ -91,7 +91,7 @@ export const getDeviceInformation = async (modbusClient: ModbusRTU) => {
   runtimeDeviceInformation = {
     numZones,
     numActuators,
-    numWindowSensors
+    numWindowSensors,
   }
 
   return deviceInformation
@@ -139,10 +139,9 @@ export const getValues = async (modbusClient: ModbusRTU): Promise<Values> => {
       currentTemperature,
       humidity,
       setTemperature,
-      batteryLevel
+      batteryLevel,
     })
   }
-
 
   return {
     mode,
@@ -235,7 +234,11 @@ const tryReadCoils = async (modbusClient: ModbusRTU, dataAddress: number, length
   }
 }
 
-const tryReadHoldingRegisters = async (modbusClient: ModbusRTU, dataAddress: number, length: number): Promise<ReadRegisterResult> => {
+const tryReadHoldingRegisters = async (
+  modbusClient: ModbusRTU,
+  dataAddress: number,
+  length: number,
+): Promise<ReadRegisterResult> => {
   try {
     logger.debug(`Reading holding register address ${dataAddress}, length ${length}`)
     return await modbusClient.readHoldingRegisters(dataAddress, length)
