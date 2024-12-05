@@ -3,6 +3,7 @@
   "scripts": {
     "build": "rm -rf dist/ && tsc",
     "format": "prettier --write src/ ./eslint.config.mjs",
+    "check-format": "prettier --check src/ ./eslint.config.mjs",
     "lint": "eslint 'src/**/*.ts'"
   },
   "devDependencies": {
