@@ -1,5 +1,7 @@
 # roth-modbus-mqtt
 
+[![CI](https://github.com/Jalle19/roth-modbus-mqtt/actions/workflows/ci.yml/badge.svg)](https://github.com/Jalle19/roth-modbus-mqtt/actions/workflows/ci.yml)
+
 A Modbus to MQTT proxy for modern Roth Touchline SL floor heating controllers.
 
 ## Features
