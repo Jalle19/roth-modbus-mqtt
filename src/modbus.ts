@@ -218,7 +218,7 @@ const parseTemperature = (value: number): number => {
 const parseHumidity = parseTemperature
 
 const encodeTemperature = (value: number): number => {
-  return Math.floor(value * 10)
+  return Math.round(value * 10)
 }
 
 export const validateDevice = (device: string): boolean => {
