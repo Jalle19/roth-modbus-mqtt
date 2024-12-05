@@ -2,7 +2,13 @@
 
 A Modbus to MQTT proxy for modern Roth Touchline SL floor heating controllers.
 
-## Unsupported features
+## Features
+
+- Supports both Modbus RTU serial devices and Modbus TCP gateways
+- Automatically discovers the number of zones
+- Supports Home Assistant auto-discovery
+
+### Unsupported features
 
 The following features are unsupported since I don't have the required hardware:
 
@@ -28,6 +34,13 @@ ExecStart=/usr/bin/node /opt/roth-modbus-mqtt/dist/roth-modbus-mqtt.js -d tcp://
 
 If everything runs correctly and your Home Assistant is configured to use the same MQTT broker, a new 
 device should appear under the MQTT integration.
+
+Run `/opt/roth-modbus-mqtt/dist/roth-modbus-mqtt.js -h` for full usage details.
+
+## Contributing
+
+Pull requests are always welcome! There are many things that are not supported, I've only implemented the 
+basics.
 
 ## License
 
