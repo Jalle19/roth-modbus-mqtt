@@ -223,5 +223,6 @@ const createZoneHvacConfiguration = (configurationBase: object, zone: number, en
     'mode_state_template': '{{ "auto" if value == "true" else "off" }}',
     'modes': ['off', 'auto'],
     'temperature_unit': 'C',
+    'temp_step': 0.1,
   }
 }

@@ -83,7 +83,7 @@ export const handlePublishedMessage = async (
 
     if (setting === 'setTemperature') {
       logger.info(`Changing zone ${zone} temperature to ${payload}`)
-      await setZoneTemperature(modbusClient, parseInt(zone, 10), parseInt(payload, 10))
+      await setZoneTemperature(modbusClient, parseInt(zone, 10), parseFloat(payload))
     } else {
       logger.error(`Unknown setting ${setting} received`)
     }
