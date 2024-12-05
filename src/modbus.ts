@@ -75,8 +75,8 @@ export const getDeviceInformation = async (modbusClient: ModbusRTU) => {
   const numWindowSensors = await probeConfiguredWindowSensors(modbusClient)
   logger.debug(`Probed ${numZones} active zones, ${numActuators} actuators, ${numWindowSensors} window sensors`)
 
-  let result = await tryReadHoldingRegisters(modbusClient, 1, 11)
-  let deviceInformation: DeviceInformation = {
+  const result = await tryReadHoldingRegisters(modbusClient, 1, 11)
+  const deviceInformation: DeviceInformation = {
     'firmwareDate': parseFirmwareDate(result.data[0]),
     'firmwareTime': parseFirmwareTime(result.data[1]),
     'firmwareVersion': parseFirmwareVersion(result.data[2], result.data[3], result.data[4]),
@@ -116,8 +116,8 @@ export const getValues = async (modbusClient: ModbusRTU): Promise<Values> => {
   result = await tryReadCoils(modbusClient, 378, 1)
   const potentialFreeContactStatus = result.data[0]
 
-  let zoneHeatingResult = await tryReadHoldingRegisters(modbusClient, 71, 1)
-  let zones = []
+  const zoneHeatingResult = await tryReadHoldingRegisters(modbusClient, 71, 1)
+  const zones = []
 
   for (let i = 0; i < runtimeDeviceInformation.numZones; i++) {
     const isHeating = Boolean(zoneHeatingResult.data[0] & (1 << i))
@@ -173,6 +173,7 @@ const probeConfiguredZones = async (modbusClient: ModbusRTU): Promise<number> =>
     try {
       await tryReadHoldingRegisters(modbusClient, 23 + zone, 1)
     } catch (e) {
+      logger.debug(`Zone ${zone + 1} seems to be unconfigured, stopping probe`, e)
       return zone
     }
   }
@@ -187,6 +188,7 @@ const probeConfiguredActuators = async (modbusClient: ModbusRTU): Promise<number
     try {
       await tryReadHoldingRegisters(modbusClient, 170 + actuator, 1)
     } catch (e) {
+      logger.debug(`Actuator ${actuator + 1} seems to be unconfigured, stopping probe`, e)
       return actuator
     }
   }
@@ -201,6 +203,7 @@ const probeConfiguredWindowSensors = async (modbusClient: ModbusRTU): Promise<nu
     try {
       await tryReadHoldingRegisters(modbusClient, 218 + windowSensor, 1)
     } catch (e) {
+      logger.debug(`Window sensor ${windowSensor + 1} seems to be unconfigured, stopping probe`, e)
       return windowSensor
     }
   }

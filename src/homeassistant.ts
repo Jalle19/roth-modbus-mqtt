@@ -47,7 +47,7 @@ export const configureMqttDiscovery = async (deviceInformation: DeviceInformatio
   }
 
   // Selects
-  let selectConfigurationMap = {
+  const selectConfigurationMap = {
     'mode': createSelectConfiguration(configurationBase, 'mode', 'Quick action mode', QUICK_ACTION_MODES),
     'heatCoolMode': createSelectConfiguration(
       configurationBase,

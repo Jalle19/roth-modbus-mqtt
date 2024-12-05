@@ -3,10 +3,10 @@ import winston, { Logger } from 'winston'
 const DEFAULT_LOG_LEVEL = 'info'
 
 // Define log transports here so we can change the log level later
-let transports = [new winston.transports.Console()]
+const transports = [new winston.transports.Console()]
 
 const logFormat = winston.format.printf(({ level, message, label, timestamp }) => {
-  return `${timestamp} [${label}] ${level}: ${message}`
+  return `${timestamp as string} [${label as string}] ${level}: ${message as string}`
 })
 
 export const setLogLevel = (logger: Logger, level: string) => {

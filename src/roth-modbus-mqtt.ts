@@ -18,6 +18,7 @@ import {
 } from './mqtt'
 import { connectAsync } from 'mqtt'
 import { configureMqttDiscovery } from './homeassistant'
+import { setIntervalAsync } from 'set-interval-async'
 
 const argv = yargs(process.argv.slice(2))
   .usage('node $0 [options]')
@@ -72,7 +73,7 @@ const argv = yargs(process.argv.slice(2))
   })
   .parseSync()
 
-;(async () => {
+void (async () => {
   const logger = createLogger('main')
   if (argv.debug) {
     setLogLevel(logger, 'debug')
@@ -133,7 +134,7 @@ const argv = yargs(process.argv.slice(2))
   // Publish readings/settings/modes/alarms once immediately, then regularly according to the configured
   // interval.
   await publishValues(modbusClient, mqttClient)
-  setInterval(async () => {
+  setIntervalAsync(async () => {
     await publishValues(modbusClient, mqttClient)
   }, argv.mqttPublishInterval * 1000)
 
@@ -144,8 +145,8 @@ const argv = yargs(process.argv.slice(2))
 
   // Subscribe to changes and register a handler
   await subscribeTopics(mqttClient)
-  mqttClient.on('message', async (topicName, payload) => {
-    await handlePublishedMessage(modbusClient, mqttClient, topicName, payload)
+  mqttClient.on('message', (topicName, payload) => {
+    void handlePublishedMessage(modbusClient, mqttClient, topicName, payload)
   })
 
   // Log reconnection attempts

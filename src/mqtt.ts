@@ -14,7 +14,7 @@ export const TOPIC_NAME_STATUS = `${TOPIC_PREFIX}/status`
 const logger = createLogger('mqtt')
 
 export const publishDeviceInformation = async (deviceInformation: DeviceInformation, mqttClient: MqttClient) => {
-  let topicValueMap: TopicValueMap = {}
+  const topicValueMap: TopicValueMap = {}
 
   for (const [item, value] of Object.entries(deviceInformation)) {
     const topicName = `${TOPIC_PREFIX_DEVICE_INFORMATION}/${item}`
@@ -30,7 +30,7 @@ export const publishDeviceInformation = async (deviceInformation: DeviceInformat
 }
 
 export const publishValues = async (modbusClient: ModbusRTU, mqttClient: MqttClient) => {
-  let topicMap: TopicValueMap = {
+  const topicValueMap: TopicValueMap = {
     [TOPIC_NAME_STATUS]: 'online',
   }
 
@@ -39,14 +39,14 @@ export const publishValues = async (modbusClient: ModbusRTU, mqttClient: MqttCli
   for (const [name, value] of Object.entries(values)) {
     if (name !== 'zones') {
       const topicName = `${TOPIC_PREFIX_STATUS}/${name}`
-      topicMap[topicName] = JSON.stringify(value)
+      topicValueMap[topicName] = JSON.stringify(value)
     } else {
       const zones = value as ZoneValues[]
 
       for (const [i, zone] of zones.entries()) {
         for (const [zoneName, zoneValue] of Object.entries(zone)) {
           const topicName = `${TOPIC_PREFIX_ZONE}/${i + 1}/${zoneName}`
-          topicMap[topicName] = JSON.stringify(zoneValue)
+          topicValueMap[topicName] = JSON.stringify(zoneValue)
         }
       }
     }
@@ -54,7 +54,7 @@ export const publishValues = async (modbusClient: ModbusRTU, mqttClient: MqttCli
 
   logger.debug('Publishing status and zones...')
 
-  await publishTopics(mqttClient, topicMap)
+  await publishTopics(mqttClient, topicValueMap)
 }
 
 export const subscribeTopics = async (mqttClient: MqttClient) => {
@@ -72,8 +72,9 @@ export const handlePublishedMessage = async (
   modbusClient: ModbusRTU,
   mqttClient: MqttClient,
   topicName: string,
-  payload: unknown,
+  payloadBuffer: Buffer,
 ) => {
+  const payload = payloadBuffer.toString()
   logger.info(`Received ${payload} on topic ${topicName}`)
 
   if (topicName.startsWith(TOPIC_PREFIX_ZONE)) {
@@ -82,7 +83,7 @@ export const handlePublishedMessage = async (
 
     if (setting === 'setTemperature') {
       logger.info(`Changing zone ${zone} temperature to ${payload}`)
-      await setZoneTemperature(modbusClient, parseInt(zone, 10), payload as number)
+      await setZoneTemperature(modbusClient, parseInt(zone, 10), parseInt(payload, 10))
     } else {
       logger.error(`Unknown setting ${setting} received`)
     }
@@ -94,10 +95,10 @@ export const handlePublishedMessage = async (
 
     switch (setting) {
       case 'mode':
-        await setMode(modbusClient, payload as number)
+        await setMode(modbusClient, parseInt(payload, 10))
         break
       case 'heatCoolMode':
-        await setHeatCoolMode(modbusClient, payload as number)
+        await setHeatCoolMode(modbusClient, parseInt(payload, 10))
         break
       default:
         logger.error(`Unknown setting ${setting}`)
