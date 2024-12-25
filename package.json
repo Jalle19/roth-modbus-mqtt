@@ -1,5 +1,6 @@
 {
   "name": "roth-modbus-mqtt",
+  "version": "0.1.0",
   "scripts": {
     "build": "rm -rf dist/ && tsc",
     "format": "prettier --write src/ ./eslint.config.mjs",
