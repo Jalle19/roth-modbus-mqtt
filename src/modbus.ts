@@ -114,23 +114,22 @@ export const getValues = async (modbusClient: ModbusRTU): Promise<Values> => {
   result = await tryReadCoils(modbusClient, 378, 1)
   const potentialFreeContactStatus = result.data[0]
 
+  // Read everything for all zones, then parse into separate zone objects
+  const numZones = runtimeDeviceInformation.numZones
   const zoneHeatingResult = await tryReadHoldingRegisters(modbusClient, 71, 1)
+  const zoneCurrentTemperatureResult = await tryReadHoldingRegisters(modbusClient, 23, numZones)
+  const zoneHumidityResults = await tryReadHoldingRegisters(modbusClient, 122, numZones)
+  const zoneSetTemperatureResult = await tryReadHoldingRegisters(modbusClient, 221, numZones)
+  const zoneBatteryLevelResult = await tryReadHoldingRegisters(modbusClient, 270, numZones)
+
   const zones = []
 
-  for (let i = 0; i < runtimeDeviceInformation.numZones; i++) {
+  for (let i = 0; i < numZones; i++) {
     const isHeating = Boolean(zoneHeatingResult.data[0] & (1 << i))
-
-    result = await tryReadHoldingRegisters(modbusClient, 23 + i, 1)
-    const currentTemperature = parseTemperature(result.data[0])
-
-    result = await tryReadHoldingRegisters(modbusClient, 122 + i, 1)
-    const humidity = parseHumidity(result.data[0])
-
-    result = await tryReadHoldingRegisters(modbusClient, 221 + i, 1)
-    const setTemperature = parseTemperature(result.data[0])
-
-    result = await tryReadHoldingRegisters(modbusClient, 270 + i, 1)
-    const batteryLevel = result.data[0]
+    const currentTemperature = parseTemperature(zoneCurrentTemperatureResult.data[i])
+    const humidity = parseHumidity(zoneHumidityResults.data[i])
+    const setTemperature = parseTemperature(zoneSetTemperatureResult.data[i])
+    const batteryLevel = zoneBatteryLevelResult.data[i]
 
     zones.push({
       isHeating,
