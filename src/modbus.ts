@@ -100,11 +100,9 @@ export const getDeviceInformation = async (modbusClient: ModbusRTU) => {
 export const getValues = async (modbusClient: ModbusRTU): Promise<Values> => {
   let result: ReadRegisterResult | ReadCoilResult
 
-  result = await tryReadHoldingRegisters(modbusClient, 18, 1)
+  result = await tryReadHoldingRegisters(modbusClient, 18, 2)
   const mode = result.data[0]
-
-  result = await tryReadHoldingRegisters(modbusClient, 19, 1)
-  const heatCoolMode = result.data[0]
+  const heatCoolMode = result.data[1]
 
   result = await tryReadCoils(modbusClient, 366, 1)
   const heatingCoolingStatus = result.data[0]
