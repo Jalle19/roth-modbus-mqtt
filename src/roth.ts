@@ -16,3 +16,13 @@ export const parseFirmwareVersion = (major: number, minor: number, revision: num
 export const parseSerialNumber = (high: number, low: number): string => {
   return String(`${high}${low}`)
 }
+
+export const parseTemperature = (value: number): number => {
+  return value / 10
+}
+
+export const parseHumidity = parseTemperature
+
+export const encodeTemperature = (value: number): number => {
+  return Math.round(value * 10)
+}

@@ -1,7 +1,15 @@
 import ModbusRTU from 'modbus-serial'
 import { createLogger } from './logger'
 import { ReadCoilResult, ReadRegisterResult } from 'modbus-serial/ModbusRTU'
-import { parseFirmwareDate, parseFirmwareTime, parseFirmwareVersion, parseSerialNumber } from './roth'
+import {
+  encodeTemperature,
+  parseFirmwareDate,
+  parseFirmwareTime,
+  parseFirmwareVersion,
+  parseHumidity,
+  parseSerialNumber,
+  parseTemperature,
+} from './roth'
 
 export enum ModbusDeviceType {
   RTU,
@@ -206,16 +214,6 @@ const probeConfiguredWindowSensors = async (modbusClient: ModbusRTU): Promise<nu
   }
 
   return 0
-}
-
-const parseTemperature = (value: number): number => {
-  return value / 10
-}
-
-const parseHumidity = parseTemperature
-
-const encodeTemperature = (value: number): number => {
-  return Math.round(value * 10)
 }
 
 export const validateDevice = (device: string): boolean => {
