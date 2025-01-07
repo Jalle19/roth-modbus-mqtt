@@ -24,7 +24,7 @@ The following features are unsupported since I don't have the required hardware:
 * Register reads may randomly fail some time after the controller has been restarted, especially before all the 
   thermostats have properly registered themselves
 * A thermostat may sometimes start reporting temperature and humidity as being 6,453.6 C and 3,276.8%. The cause of 
-  this is unknown at this point
+  this is unknown at this point. When such values are encountered, `null` is used as the sensor state value.
 
 ## Installation
 
