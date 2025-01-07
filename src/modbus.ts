@@ -49,8 +49,8 @@ type RuntimeDeviceInformation = {
 
 export type ZoneValues = {
   isHeating: boolean
-  currentTemperature: number
-  humidity: number
+  currentTemperature: number | null
+  humidity: number | null
   setTemperature: number
   batteryLevel: number
 }
@@ -136,7 +136,7 @@ export const getValues = async (modbusClient: ModbusRTU): Promise<Values> => {
     const isHeating = Boolean(zoneHeatingResult.data[0] & (1 << i))
     const currentTemperature = parseTemperature(zoneCurrentTemperatureResult.data[i])
     const humidity = parseHumidity(zoneHumidityResults.data[i])
-    const setTemperature = parseTemperature(zoneSetTemperatureResult.data[i])
+    const setTemperature = parseTemperature(zoneSetTemperatureResult.data[i]) as number
     const batteryLevel = zoneBatteryLevelResult.data[i]
 
     zones.push({

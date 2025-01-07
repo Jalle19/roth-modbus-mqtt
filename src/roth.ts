@@ -17,8 +17,11 @@ export const parseSerialNumber = (high: number, low: number): string => {
   return String(`${high}${low}`)
 }
 
-export const parseTemperature = (value: number): number => {
-  return value / 10
+export const parseTemperature = (value: number): number | null => {
+  const scaledValue = value / 10
+
+  // Use null if value is invalid (temperature and humidity can sometimes get reported using maximum values)
+  return scaledValue > 1000 ? null : scaledValue
 }
 
 export const parseHumidity = parseTemperature
