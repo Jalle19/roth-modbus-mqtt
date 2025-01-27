@@ -49,6 +49,7 @@ type RuntimeDeviceInformation = {
 
 export type ZoneValues = {
   isHeating: boolean
+  communicationError: boolean
   currentTemperature: number | null
   humidity: number | null
   setTemperature: number
@@ -123,7 +124,7 @@ export const getValues = async (modbusClient: ModbusRTU): Promise<Values> => {
   const potentialFreeContactStatus = result.data[0]
 
   // Read everything for all zones, then parse into separate zone objects
-  const zones = []
+  const zones: ZoneValues[] = []
   const numZones = runtimeDeviceInformation.numZones
 
   if (numZones > 0) {
@@ -140,8 +141,13 @@ export const getValues = async (modbusClient: ModbusRTU): Promise<Values> => {
       const setTemperature = parseTemperature(zoneSetTemperatureResult.data[i]) as number
       const batteryLevel = zoneBatteryLevelResult.data[i]
 
+      // Communication errors appear as invalid temperature and humidity sensor values, there
+      // are no separate registers for them
+      const communicationError = currentTemperature === null || humidity === null
+
       zones.push({
         isHeating,
+        communicationError,
         currentTemperature,
         humidity,
         setTemperature,
