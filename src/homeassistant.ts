@@ -80,6 +80,17 @@ export const configureMqttDiscovery = async (deviceInformation: DeviceInformatio
         zone,
         'isHeating',
         `Zone ${zone} heating`,
+        { 'icon': 'mdi:heat-wave' },
+      ),
+      [`zone${zone}CommunicationError`]: createZoneBinarySensorConfiguration(
+        configurationBase,
+        zone,
+        'communicationError',
+        `Zone ${zone} communication error`,
+        {
+          'icon': 'mdi:alarm-bell',
+          'entity_category': 'diagnostic',
+        },
       ),
     }
 
@@ -178,6 +189,7 @@ const createZoneBinarySensorConfiguration = (
   zone: number,
   statusName: string,
   entityName: string,
+  extraProperties: object = {},
 ) => {
   return {
     ...configurationBase,
@@ -187,7 +199,7 @@ const createZoneBinarySensorConfiguration = (
     'state_topic': `${TOPIC_PREFIX_ZONE}/${zone}/${statusName}`,
     'payload_on': 'true',
     'payload_off': 'false',
-    'icon': 'mdi:heat-wave',
+    ...extraProperties,
   }
 }
 

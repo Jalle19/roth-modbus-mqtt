@@ -49,6 +49,7 @@ type RuntimeDeviceInformation = {
 
 export type ZoneValues = {
   isHeating: boolean
+  communicationError: boolean
   currentTemperature: number | null
   humidity: number | null
   setTemperature: number
@@ -123,29 +124,36 @@ export const getValues = async (modbusClient: ModbusRTU): Promise<Values> => {
   const potentialFreeContactStatus = result.data[0]
 
   // Read everything for all zones, then parse into separate zone objects
+  const zones: ZoneValues[] = []
   const numZones = runtimeDeviceInformation.numZones
-  const zoneHeatingResult = await tryReadHoldingRegisters(modbusClient, 71, 1)
-  const zoneCurrentTemperatureResult = await tryReadHoldingRegisters(modbusClient, 23, numZones)
-  const zoneHumidityResults = await tryReadHoldingRegisters(modbusClient, 122, numZones)
-  const zoneSetTemperatureResult = await tryReadHoldingRegisters(modbusClient, 221, numZones)
-  const zoneBatteryLevelResult = await tryReadHoldingRegisters(modbusClient, 270, numZones)
 
-  const zones = []
+  if (numZones > 0) {
+    const zoneHeatingResult = await tryReadHoldingRegisters(modbusClient, 71, 1)
+    const zoneCurrentTemperatureResult = await tryReadHoldingRegisters(modbusClient, 23, numZones)
+    const zoneHumidityResults = await tryReadHoldingRegisters(modbusClient, 122, numZones)
+    const zoneSetTemperatureResult = await tryReadHoldingRegisters(modbusClient, 221, numZones)
+    const zoneBatteryLevelResult = await tryReadHoldingRegisters(modbusClient, 270, numZones)
 
-  for (let i = 0; i < numZones; i++) {
-    const isHeating = Boolean(zoneHeatingResult.data[0] & (1 << i))
-    const currentTemperature = parseTemperature(zoneCurrentTemperatureResult.data[i])
-    const humidity = parseHumidity(zoneHumidityResults.data[i])
-    const setTemperature = parseTemperature(zoneSetTemperatureResult.data[i]) as number
-    const batteryLevel = zoneBatteryLevelResult.data[i]
+    for (let i = 0; i < numZones; i++) {
+      const isHeating = Boolean(zoneHeatingResult.data[0] & (1 << i))
+      const currentTemperature = parseTemperature(zoneCurrentTemperatureResult.data[i])
+      const humidity = parseHumidity(zoneHumidityResults.data[i])
+      const setTemperature = parseTemperature(zoneSetTemperatureResult.data[i]) as number
+      const batteryLevel = zoneBatteryLevelResult.data[i]
 
-    zones.push({
-      isHeating,
-      currentTemperature,
-      humidity,
-      setTemperature,
-      batteryLevel,
-    })
+      // Communication errors appear as invalid temperature and humidity sensor values, there
+      // are no separate registers for them
+      const communicationError = currentTemperature === null || humidity === null
+
+      zones.push({
+        isHeating,
+        communicationError,
+        currentTemperature,
+        humidity,
+        setTemperature,
+        batteryLevel,
+      })
+    }
   }
 
   return {

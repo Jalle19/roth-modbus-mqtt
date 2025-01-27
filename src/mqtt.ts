@@ -46,7 +46,11 @@ export const publishValues = async (modbusClient: ModbusRTU, mqttClient: MqttCli
       for (const [i, zone] of zones.entries()) {
         for (const [zoneName, zoneValue] of Object.entries(zone)) {
           const topicName = `${TOPIC_PREFIX_ZONE}/${i + 1}/${zoneName}`
-          topicValueMap[topicName] = JSON.stringify(zoneValue)
+
+          // Convert null to "None"
+          const mqttValue = zoneValue === null ? 'None' : zoneValue
+
+          topicValueMap[topicName] = JSON.stringify(mqttValue)
         }
       }
     }
