@@ -146,7 +146,7 @@ void (async () => {
   // Subscribe to changes and register a handler
   await subscribeTopics(mqttClient)
   mqttClient.on('message', (topicName, payload) => {
-    void handlePublishedMessage(modbusClient, mqttClient, topicName, payload)
+    void handlePublishedMessage(modbusClient, topicName, payload)
   })
 
   // Log reconnection attempts

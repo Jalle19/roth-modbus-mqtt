@@ -72,12 +72,7 @@ export const subscribeTopics = async (mqttClient: MqttClient) => {
   }
 }
 
-export const handlePublishedMessage = async (
-  modbusClient: ModbusRTU,
-  mqttClient: MqttClient,
-  topicName: string,
-  payloadBuffer: Buffer,
-) => {
+export const handlePublishedMessage = async (modbusClient: ModbusRTU, topicName: string, payloadBuffer: Buffer) => {
   const payload = payloadBuffer.toString()
   logger.info(`Received ${payload} on topic ${topicName}`)
 
