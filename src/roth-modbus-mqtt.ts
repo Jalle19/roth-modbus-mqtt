@@ -6,6 +6,7 @@ import {
   ModbusRtuDevice,
   ModbusTcpDevice,
   parseDevice,
+  probePeripherals,
   validateDevice,
 } from './modbus'
 import ModbusRTU from 'modbus-serial'
@@ -63,6 +64,12 @@ const argv = yargs(process.argv.slice(2))
       description: 'Whether to enable Home Assistant MQTT discovery support.',
       type: 'boolean',
       default: true,
+    },
+    'probePeripheralsInterval': {
+      description:
+        'How often (in minutes) the controller should be probed for available peripherals (zones, actuators etc.)',
+      type: 'number',
+      default: 10,
     },
     'debug': {
       description: 'Enable debug logging',
@@ -127,9 +134,18 @@ void (async () => {
   const mqttClient = await connectAsync(argv.mqttBrokerUrl, clientOptions)
   logger.info(`Successfully connected to MQTT broker at ${argv.mqttBrokerUrl}`)
 
-  // Publish device information once only (since it doesn't change)
+  // Publish device information once, since it's mostly static and doesn't change.
   const deviceInformation = await getDeviceInformation(modbusClient)
   await publishDeviceInformation(deviceInformation, mqttClient)
+
+  // Regularly probe for peripherals (to account for transient read errors during early startup of the controller,
+  // which can lead to the number of devices being found to be incorrect)
+  setIntervalAsync(
+    async () => {
+      await probePeripherals(modbusClient)
+    },
+    argv.probePeripheralsInterval * 60 * 1000,
+  )
 
   // Publish readings/settings/modes/alarms once immediately, then regularly according to the configured
   // interval.
