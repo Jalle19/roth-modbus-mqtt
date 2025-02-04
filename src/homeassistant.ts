@@ -184,6 +184,7 @@ const createSelectConfiguration = (
     'command_topic': `${TOPIC_PREFIX_STATUS}/${selectName}/set`,
     'command_template': '{{ this.attributes.options.index(value) }}',
     'value_template': '{{ this.attributes.options[(value | int)] }}',
+    'entity_category': 'config',
   }
 }
 
