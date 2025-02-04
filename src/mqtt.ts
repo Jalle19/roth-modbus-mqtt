@@ -1,7 +1,15 @@
 import ModbusRTU from 'modbus-serial'
 import { IClientPublishOptions, MqttClient } from 'mqtt'
 import { createLogger } from './logger'
-import { DeviceInformation, getValues, setHeatCoolMode, setMode, setZoneTemperature, ZoneValues } from './modbus'
+import {
+  DeviceInformation,
+  getValues,
+  probePeripherals,
+  setHeatCoolMode,
+  setMode,
+  setZoneTemperature,
+  ZoneValues,
+} from './modbus'
 
 type TopicValueMap = Record<string, string>
 
@@ -9,6 +17,7 @@ export const TOPIC_PREFIX = 'roth-modbus-mqtt'
 export const TOPIC_PREFIX_DEVICE_INFORMATION = `${TOPIC_PREFIX}/deviceInformation`
 export const TOPIC_PREFIX_STATUS = `${TOPIC_PREFIX}/status`
 export const TOPIC_PREFIX_ZONE = `${TOPIC_PREFIX_STATUS}/zone`
+export const TOPIC_PREFIX_BUTTON = `${TOPIC_PREFIX}/button`
 export const TOPIC_NAME_STATUS = `${TOPIC_PREFIX}/status`
 
 const logger = createLogger('mqtt')
@@ -30,10 +39,13 @@ export const publishDeviceInformation = async (deviceInformation: DeviceInformat
 }
 
 export const publishValues = async (modbusClient: ModbusRTU, mqttClient: MqttClient) => {
+  // Static topic values
   const topicValueMap: TopicValueMap = {
     [TOPIC_NAME_STATUS]: 'online',
+    [`${TOPIC_PREFIX_BUTTON}/probePeripherals`]: 'online',
   }
 
+  // One topic for each value
   const values = await getValues(modbusClient)
 
   for (const [name, value] of Object.entries(values)) {
@@ -63,7 +75,12 @@ export const publishValues = async (modbusClient: ModbusRTU, mqttClient: MqttCli
 
 export const subscribeTopics = async (mqttClient: MqttClient) => {
   // Subscribe to writable topics
-  const topicNames = [`${TOPIC_PREFIX_STATUS}/+/set`, `${TOPIC_PREFIX_ZONE}/+/+/set`]
+  const topicNames = [
+    // prettier-hack
+    `${TOPIC_PREFIX_STATUS}/+/set`,
+    `${TOPIC_PREFIX_ZONE}/+/+/set`,
+    `${TOPIC_PREFIX_BUTTON}/+/set`,
+  ]
 
   for (const topicName of topicNames) {
     logger.info(`Subscribing to topic(s) ${topicName}`)
@@ -101,6 +118,17 @@ export const handlePublishedMessage = async (modbusClient: ModbusRTU, topicName:
         break
       default:
         logger.error(`Unknown setting ${setting}`)
+    }
+  } else if (topicName.startsWith(TOPIC_PREFIX_BUTTON)) {
+    const partialTopic = topicName.substring(TOPIC_PREFIX_STATUS.length + 1)
+    const [button] = partialTopic.split('/')
+
+    logger.info(`Handling button press for button ${button}`)
+
+    switch (button) {
+      case 'probePeripherals':
+        await probePeripherals(modbusClient)
+        break
     }
   }
 }
