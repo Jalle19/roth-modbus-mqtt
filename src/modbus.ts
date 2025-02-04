@@ -29,16 +29,13 @@ export type ModbusTcpDevice = {
 
 type ModbusDevice = ModbusRtuDevice | ModbusTcpDevice
 
-export type DeviceInformation = {
+export type DeviceInformation = RuntimeDeviceInformation & {
   firmwareDate: string
   firmwareTime: string
   firmwareVersion: string
   pcbVersion: number
   serialNumber: string
   bootloaderFirmwareVersion: string
-  numZones: number
-  numActuators: number
-  numWindowSensors: number
 }
 
 type RuntimeDeviceInformation = {
@@ -74,36 +71,39 @@ let runtimeDeviceInformation: RuntimeDeviceInformation = {
   numWindowSensors: 0,
 }
 
-export const getDeviceInformation = async (modbusClient: ModbusRTU) => {
-  logger.debug('Retrieving device information...')
-
-  // Feature checks
-  logger.info('Probing for features...')
+export const probePeripherals = async (modbusClient: ModbusRTU) => {
+  logger.info('Probing for peripherals...')
   const numZones = await probeConfiguredZones(modbusClient)
   const numActuators = await probeConfiguredActuators(modbusClient)
   const numWindowSensors = await probeConfiguredWindowSensors(modbusClient)
   logger.debug(`Probed ${numZones} active zones, ${numActuators} actuators, ${numWindowSensors} window sensors`)
 
+  // Store the results as runtime device information
+  runtimeDeviceInformation = {
+    numZones,
+    numActuators,
+    numWindowSensors,
+  }
+}
+
+export const getDeviceInformation = async (modbusClient: ModbusRTU): Promise<DeviceInformation> => {
+  logger.debug('Retrieving device information...')
+
+  // Probe for peripherals first, this will update runtimeDeviceInformation
+  await probePeripherals(modbusClient)
+
+  // Fetch static device information
   const result = await tryReadHoldingRegisters(modbusClient, 1, 11)
-  const deviceInformation: DeviceInformation = {
+
+  return {
     'firmwareDate': parseFirmwareDate(result.data[0]),
     'firmwareTime': parseFirmwareTime(result.data[1]),
     'firmwareVersion': parseFirmwareVersion(result.data[2], result.data[3], result.data[4]),
     'pcbVersion': result.data[5],
     'serialNumber': parseSerialNumber(result.data[6], result.data[7]),
     'bootloaderFirmwareVersion': parseFirmwareVersion(result.data[8], result.data[9], result.data[10]),
-    numZones,
-    numActuators,
-    numWindowSensors,
+    ...runtimeDeviceInformation,
   }
-
-  runtimeDeviceInformation = {
-    numZones,
-    numActuators,
-    numWindowSensors,
-  }
-
-  return deviceInformation
 }
 
 export const getValues = async (modbusClient: ModbusRTU): Promise<Values> => {

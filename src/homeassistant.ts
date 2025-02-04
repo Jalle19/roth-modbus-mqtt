@@ -1,5 +1,11 @@
 import { DeviceInformation } from './modbus'
-import { TOPIC_NAME_STATUS, TOPIC_PREFIX_DEVICE_INFORMATION, TOPIC_PREFIX_STATUS, TOPIC_PREFIX_ZONE } from './mqtt'
+import {
+  TOPIC_NAME_STATUS,
+  TOPIC_PREFIX_BUTTON,
+  TOPIC_PREFIX_DEVICE_INFORMATION,
+  TOPIC_PREFIX_STATUS,
+  TOPIC_PREFIX_ZONE,
+} from './mqtt'
 import { createLogger } from './logger'
 import { MqttClient } from 'mqtt'
 import { HEATING_COOLING_MODES, QUICK_ACTION_MODES } from './roth'
@@ -67,6 +73,13 @@ export const configureMqttDiscovery = async (deviceInformation: DeviceInformatio
     ),
   }
 
+  const buttonConfigurationMap = {
+    'probePeripherals': createButtonConfiguration(configurationBase, 'probePeripherals', 'Probe peripherals', {
+      'icon': 'mdi:camera-metering-center',
+      'entity_category': 'config',
+    }),
+  }
+
   let hvacConfigurationMap = {}
 
   // Various repeated sensors for each zone
@@ -116,6 +129,7 @@ export const configureMqttDiscovery = async (deviceInformation: DeviceInformatio
     'binary_sensor': binarySensorConfigurationMap,
     'select': selectConfigurationMap,
     'climate': hvacConfigurationMap,
+    'button': buttonConfigurationMap,
   }
 
   // Publish configurations
@@ -170,6 +184,24 @@ const createSelectConfiguration = (
     'command_topic': `${TOPIC_PREFIX_STATUS}/${selectName}/set`,
     'command_template': '{{ this.attributes.options.index(value) }}',
     'value_template': '{{ this.attributes.options[(value | int)] }}',
+    'entity_category': 'config',
+  }
+}
+
+const createButtonConfiguration = (
+  configurationBase: object,
+  buttonName: string,
+  entityName: string,
+  extraProperties: object = {},
+) => {
+  return {
+    ...configurationBase,
+    'unique_id': `roth-${buttonName}`,
+    'name': entityName,
+    'object_id': `roth_button_${buttonName}`,
+    'availability_topic': `${TOPIC_PREFIX_BUTTON}/${buttonName}`,
+    'command_topic': `${TOPIC_PREFIX_BUTTON}/${buttonName}/set`,
+    ...extraProperties,
   }
 }
 
