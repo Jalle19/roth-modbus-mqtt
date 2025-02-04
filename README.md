@@ -10,6 +10,13 @@ A Modbus to MQTT proxy for modern Roth Touchline SL floor heating controllers.
 - Automatically discovers the number of zones
 - Supports Home Assistant auto-discovery
 
+### Screenshots (from Home Assistant)
+
+![Controls](resources/controls.png)
+![Configuration](resources/configuration.png)
+![Sensors](resources/sensors.png)
+![Diagnostic](resources/diagnostic.png)
+
 ### Unsupported features
 
 The following features are unsupported since I don't have the required hardware:
