@@ -25,6 +25,9 @@ The following features are unsupported since I don't have the required hardware:
   thermostats have properly registered themselves
 * When a thermostat has issues communicating with the controller, temperature and humidity will be `null`, and the 
   zone-specific binary sensor will turn on
+* If the controller is rebooted while the application is running, the number of detected zones, window sensor etc. may 
+  initially be incorrect. Regular peripheral probes are done to rectify this issue. The user can also trigger a 
+  peripheral at runtime via an MQTT button 
 
 ## Installation
 
