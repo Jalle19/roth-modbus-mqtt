@@ -164,6 +164,7 @@ const createBinarySensorConfiguration = (
     'state_topic': `${TOPIC_PREFIX_STATUS}/${statusName}`,
     'payload_on': 'true',
     'payload_off': 'false',
+    'state_class': 'measurement',
     ...extraProperties,
   }
 }
@@ -231,6 +232,7 @@ const createZoneBinarySensorConfiguration = (
     'state_topic': `${TOPIC_PREFIX_ZONE}/${zone}/${statusName}`,
     'payload_on': 'true',
     'payload_off': 'false',
+    'state_class': 'measurement',
     ...extraProperties,
   }
 }
